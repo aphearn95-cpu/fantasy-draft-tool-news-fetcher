@@ -131,4 +131,10 @@ else:
     print("No existing news file found in Drive -- starting fresh history.")
 
 upload_csv(matched_news, 'espn_news.csv')
-print(f"Saved espn_news.csv -- {len(matched_news)} items total (accumulated history)")
+print(f"Saved espn_news.csv to Drive -- {len(matched_news)} items total (accumulated history)")
+
+# ALSO write a local copy in the repo's checkout directory -- the workflow commits this
+# back into the repo itself, so the live draft tool can auto-fetch it via GitHub's
+# CORS-friendly raw content URLs instead of needing a manual upload each time.
+matched_news.to_csv('espn_news.csv', index=False)
+print("Also wrote local espn_news.csv for the workflow to commit into the repo")

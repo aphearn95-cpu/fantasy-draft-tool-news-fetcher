@@ -10,6 +10,9 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch: {}  # lets you trigger it manually from GitHub's Actions tab, for testing
 
+permissions:
+  contents: write  # needed for this workflow to commit the CSV back into the repo
+
 jobs:
   fetch-news:
     runs-on: ubuntu-latest
@@ -27,7 +30,14 @@ jobs:
 
       - name: Run news fetch
         env:
-          # NOTE: no FP_API_KEY needed anymore -- ESPN's endpoint requires no authentication
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
         run: python fetch_espn_news_scheduled.py
+
+      - name: Commit and push updated CSV
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add espn_news.csv
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update ESPN news data"
+          git push

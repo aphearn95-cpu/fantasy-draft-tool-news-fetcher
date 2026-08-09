@@ -1,0 +1,33 @@
+name: Fetch ESPN NFL News
+
+on:
+  schedule:
+    # UTC times -- adjust to your timezone. Runs 4x/day: ~7am, 12pm, 4pm, 8pm Eastern
+    # (11:00, 16:00, 20:00, 00:00 UTC during EDT). Cron syntax: minute hour day month weekday
+    - cron: '0 11 * * *'
+    - cron: '0 16 * * *'
+    - cron: '0 20 * * *'
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}  # lets you trigger it manually from GitHub's Actions tab, for testing
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install pandas numpy requests google-auth google-api-python-client
+
+      - name: Run news fetch
+        env:
+          # NOTE: no FP_API_KEY needed anymore -- ESPN's endpoint requires no authentication
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          DRIVE_FOLDER_ID: ${{ secrets.DRIVE_FOLDER_ID }}
+        run: python fetch_espn_news_scheduled.py
